@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#CourseMetaSummaryEnrollmentDataTask \ not working
+#list=("CourseProgramMetadataDataTask" "CourseMetaSummaryEnrollmentTableTask" "CourseProgramMetadataTableTask) 
+#dependancy=("CourseProgramMetadataTableTask" )
+function map()
+{
+PYTHONPATH='.' luigi --module enrollments $1 --mapreduce-engine hadoop --remote-log-level 1 --source '["hdfs://localhost:9000/data/"]' --expand-interval '2 days' --pattern '["tracking.log"]' --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/' --interval-start '2014-06-01' 
+}
+
+function tabletask()
+{
+#dependancy encounting
+PYTHONPATH='.' luigi --module enrollments $1 --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/'  
+}
+
+function partitiontask()
+{
+#dependancy encounting
+PYTHONPATH='.' luigi --module enrollments $1 --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/'  --date '2018-01-01' 
+}
+
+function eventtask()
+{
+#dependancy encounting
+PYTHONPATH='.' luigi --module enrollments $1 --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/'  --date '2018-01-01' --mapreduce-engine "hadoop"
+}
+
+function modetask()
+{
+PYTHONPATH='.' luigi --module enrollments $1 --mapreduce-engine hadoop --remote-log-level 1 --source '["hdfs://localhost:9000/data/"]' --expand-interval '2 days' --pattern '["tracking.log"]' --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/' --interval-start '2014-06-01'  --database 'reports' --credentials '/edx/etc/edx-analytics-pipeline/output.json' --overwrite-n-days 2
+
+}
+
+function datatask()
+{
+
+PYTHONPATH='.' luigi --module enrollments $1 --mapreduce-engine hadoop --remote-log-level 1 --source '["hdfs://localhost:9000/data/"]' --expand-interval '2 days' --pattern '["tracking.log"]' --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/' --interval-start '2014-06-01'  --overwrite-n-days 2 
+
+}
+
+function outputtask()
+{
+
+PYTHONPATH='.' luigi --module enrollments $1 --mapreduce-engine hadoop --remote-log-level 1 --source '["hdfs://localhost:9000/data/"]' --expand-interval '2 days' --pattern '["tracking.log"]' --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/' --interval-start '2014-06-01'  --overwrite-n-days 2 --output-root 'hdfs://localhost:9000/edx-analytics-pipeline/event-export/output/'
+
+}
+
+function eventtask()
+{
+#map-reduce
+#dependancy encounting
+PYTHONPATH='.' luigi --module enrollments $1 --warehouse-path 'hdfs://localhost:9000/edx-analytics-pipeline/warehouse/'  --date '2018-01-01' --mapreduce-engine "hadoop" --remote-log-level 1 --marker 'hdfs://localhost:9000/edx-analytics-pipeline/marker/' --source '["hdfs://localhost:9000/data/tracking.log"]' --interval '2016-04-01-2019-05-01' --expand-interval '1w 1d 1h 1m 1s' --pattern '["*tracking.log*"]'
+}
+
+function dateintervaltask()
+{
+#map-reduce
+#dependancy encounting
+PYTHONPATH='.' luigi --module enrollments $1 --source '["hdfs://localhost:9000/data/custome-tracking.log"]' --interval '2016-04-01-2019-05-01' --expand-interval '0 w 2 d 0 h 0 m 0 s' --date-pattern='%Y%m%d' --pattern '[".*tracking.log.*"]'
+}
+
+#outputtask $1
+#datatask $1
+#map $1
+#modetask $1
+#tabletask $1
+#partitiontask $1
+eventtask $1
+#dateintervaltask $1
