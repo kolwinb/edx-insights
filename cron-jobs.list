@@ -1,0 +1,4 @@
+#Ansible: log-ntp-alerts
+* * * * * /edx/bin/log-ntp-alerts.sh >/dev/null 2>&1
+29 14 * * * su - hadoop /edx/app/hadoop/hadoop/bin/hadoop fs -copyFromLocal /home/edx/tracking/* /data
+
